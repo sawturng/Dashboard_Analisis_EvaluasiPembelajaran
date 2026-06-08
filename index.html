@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Analisis Butir Soal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f5f2;--white:#ffffff;
+  --pink:#f9a8d4;--pink-soft:#fce7f3;--pink-text:#be185d;
+  --blue:#93c5fd;--blue-soft:#eff6ff;--blue-text:#1d4ed8;
+  --mint:#6ee7b7;--mint-soft:#ecfdf5;--mint-text:#065f46;
+  --lavender:#c4b5fd;--lavender-soft:#f5f3ff;--lavender-text:#5b21b6;
+  --peach:#fca5a5;--peach-soft:#fff1f2;--peach-text:#be123c;
+  --yellow:#fde68a;--yellow-soft:#fffbeb;--yellow-text:#92400e;
+  --text:#1c1917;--text2:#57534e;--text3:#a8a29e;
+  --border:#e7e5e4;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── PRINT ── */
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff}
+  .header{border-bottom:2px solid #e7e5e4}
+  .card,.stat-card{box-shadow:none;border:1px solid #e7e5e4}
+  .main{padding:1rem}
+  footer{border-top:1px solid #e7e5e4}
+}
+
+/* ── HEADER ── */
+.header{background:var(--white);border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.header-shapes{position:absolute;inset:0;pointer-events:none}
+.shape{position:absolute;border-radius:50%}
+.s1{width:320px;height:320px;background:var(--pink-soft);top:-120px;right:-60px;opacity:0.9}
+.s2{width:200px;height:200px;background:var(--blue-soft);bottom:-80px;right:200px;opacity:0.8}
+.s3{width:150px;height:150px;background:var(--mint-soft);top:-40px;right:280px;opacity:0.7}
+.s4{width:100px;height:100px;background:var(--lavender-soft);top:20px;right:480px;opacity:0.6}
+.s5{width:80px;height:80px;background:var(--yellow-soft);bottom:10px;right:420px;opacity:0.7}
+.header-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#d6d3d1 1px,transparent 1px);background-size:24px 24px;opacity:0.35}
+.header-content{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:2.2rem 2rem 2rem;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2rem}
+.header-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--pink-soft);border:1.5px solid var(--pink);border-radius:100px;padding:4px 14px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--pink-text);margin-bottom:0.9rem}
+.header-eyebrow span{width:6px;height:6px;border-radius:50%;background:var(--pink-text)}
+.header h1{font-family:'DM Serif Display',serif;font-size:2.2rem;font-weight:400;line-height:1.15;color:var(--text);margin-bottom:0.5rem}
+.header h1 em{font-style:italic;color:var(--pink-text)}
+.header p{font-size:0.86rem;color:var(--text2);line-height:1.65;max-width:480px}
+.header-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.2rem}
+.hbadge{display:inline-flex;align-items:center;gap:5px;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:0.76rem;color:var(--text2);box-shadow:var(--shadow)}
+.hbadge strong{color:var(--text);font-weight:600}
+/* identity badge */
+.identity-bar{display:flex;align-items:center;gap:10px;margin-top:1rem;padding:10px 14px;background:var(--lavender-soft);border:1px solid var(--lavender);border-radius:12px;width:fit-content}
+.id-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#c4b5fd,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.id-name{font-size:0.82rem;font-weight:600;color:var(--lavender-text)}
+.id-nim{font-size:0.72rem;color:var(--text3);margin-top:1px}
+.header-right{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.hstat{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:12px 18px;box-shadow:var(--shadow);min-width:150px;text-align:center;position:relative;overflow:hidden}
+.hstat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.hstat.hs-pink::before{background:linear-gradient(90deg,#f9a8d4,#f472b6)}
+.hstat.hs-blue::before{background:linear-gradient(90deg,#93c5fd,#60a5fa)}
+.hstat.hs-mint::before{background:linear-gradient(90deg,#6ee7b7,#34d399)}
+.hstat-val{font-size:1.6rem;font-weight:700;color:var(--text);line-height:1}
+.hstat-lbl{font-size:0.67rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-top:3px}
+
+/* ── TOOLBAR ── */
+.toolbar{background:var(--white);border-bottom:1px solid var(--border);padding:0.7rem 2rem}
+.toolbar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toolbar-left{font-size:0.78rem;color:var(--text3)}
+.toolbar-left strong{color:var(--text2)}
+.btn-print{display:inline-flex;align-items:center;gap:7px;background:var(--pink-text);color:#fff;border:none;border-radius:10px;padding:8px 18px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity 0.15s,transform 0.1s}
+.btn-print:hover{opacity:0.88}
+.btn-print:active{transform:scale(0.97)}
+.btn-print svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── MAIN ── */
+.main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 4rem}
+
+/* ── SECTION ── */
+.section-label{display:flex;align-items:center;gap:10px;margin-bottom:1rem;margin-top:2.5rem}
+.section-label:first-of-type{margin-top:0}
+.section-num{width:26px;height:26px;border-radius:8px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+.sn-pink{background:linear-gradient(135deg,#f9a8d4,#ec4899)}
+.sn-blue{background:linear-gradient(135deg,#93c5fd,#3b82f6)}
+.sn-mint{background:linear-gradient(135deg,#6ee7b7,#10b981)}
+.sn-lav{background:linear-gradient(135deg,#c4b5fd,#8b5cf6)}
+.sn-peach{background:linear-gradient(135deg,#fca5a5,#ef4444)}
+.section-label h2{font-size:1.1rem;font-weight:700;color:var(--text)}
+.section-label p{font-size:0.77rem;color:var(--text3);margin-top:1px}
+
+/* ── CARD ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:1.4rem 1.5rem}
+.card-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:1rem}
+
+/* ── INTERPRETASI ── */
+.interp-box{margin-top:1.2rem;padding:12px 14px;border-radius:12px;font-size:0.8rem;line-height:1.6;border-left:3px solid}
+.interp-pink{background:var(--pink-soft);border-color:var(--pink-text);color:var(--pink-text)}
+.interp-blue{background:var(--blue-soft);border-color:#3b82f6;color:var(--blue-text)}
+.interp-mint{background:var(--mint-soft);border-color:#10b981;color:var(--mint-text)}
+.interp-lav{background:var(--lavender-soft);border-color:#8b5cf6;color:var(--lavender-text)}
+.interp-yellow{background:var(--yellow-soft);border-color:#f59e0b;color:var(--yellow-text)}
+.interp-box strong{font-weight:700}
+
+/* ── INFO STRIP ── */
+.info-strip{background:var(--blue-soft);border:1px solid var(--blue);border-left:3px solid #3b82f6;border-radius:0 10px 10px 0;padding:10px 16px;font-size:0.81rem;color:var(--blue-text);margin-bottom:1.6rem}
+
+/* ── STAT CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.stat-card{padding:1.2rem 1.3rem;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:-20px;right:-20px;width:70px;height:70px;border-radius:50%;opacity:0.12}
+.sc-pink::after{background:#ec4899}.sc-blue::after{background:#3b82f6}.sc-lav::after{background:#8b5cf6}
+.sc-mint::after{background:#10b981}.sc-peach::after{background:#ef4444}.sc-yellow::after{background:#f59e0b}
+.stat-accent{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:0.8rem}
+.sa-pink{background:var(--pink-soft)}.sa-blue{background:var(--blue-soft)}.sa-lav{background:var(--lavender-soft)}
+.sa-mint{background:var(--mint-soft)}.sa-peach{background:var(--peach-soft)}.sa-yellow{background:var(--yellow-soft)}
+.stat-label{font-size:0.68rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin-bottom:0.4rem}
+.stat-value{font-size:1.9rem;font-weight:700;line-height:1;color:var(--text)}
+.stat-value sub{font-size:0.9rem;font-weight:400;color:var(--text3);vertical-align:baseline}
+.stat-badge{display:inline-block;margin-top:0.5rem;padding:2px 9px;border-radius:20px;font-size:0.68rem;font-weight:700}
+.badge-pink{background:var(--pink-soft);color:var(--pink-text)}
+.badge-blue{background:var(--blue-soft);color:var(--blue-text)}
+.badge-lav{background:var(--lavender-soft);color:var(--lavender-text)}
+.badge-mint{background:var(--mint-soft);color:var(--mint-text)}
+.badge-peach{background:var(--peach-soft);color:var(--peach-text)}
+.badge-yellow{background:var(--yellow-soft);color:var(--yellow-text)}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}.header-content{grid-template-columns:1fr}.header-right{flex-direction:row;flex-wrap:wrap}}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.8rem}
+thead tr{border-bottom:2px solid var(--border)}
+thead th{padding:8px 10px;text-align:left;font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);white-space:nowrap}
+tbody tr{border-bottom:1px solid #fafaf9;transition:background 0.1s}
+tbody tr:hover{background:#fafaf9}
+tbody tr.row-dipakai{background:#f0fdf4}
+tbody tr.row-dipakai:hover{background:#dcfce7}
+tbody td{padding:8px 10px;color:var(--text2)}
+tbody td:first-child{font-weight:700;color:var(--text)}
+.dipakai-badge{display:inline-flex;align-items:center;gap:4px;font-size:0.65rem;font-weight:700;color:var(--mint-text);background:var(--mint-soft);border:1px solid var(--mint);border-radius:6px;padding:1px 7px;margin-left:5px;vertical-align:middle}
+
+/* ── FILTER ── */
+.filter-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.filter-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:0.75rem;font-weight:600;color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s}
+.filter-btn:hover{border-color:var(--pink);color:var(--pink-text)}
+.filter-btn.active{background:var(--pink-soft);border-color:var(--pink);color:var(--pink-text)}
+.filter-btn.fb-mint.active{background:var(--mint-soft);border-color:var(--mint);color:var(--mint-text)}
+.filter-btn.fb-blue.active{background:var(--blue-soft);border-color:var(--blue);color:var(--blue-text)}
+
+/* ── PILLS ── */
+.pill{display:inline-block;padding:2px 9px;border-radius:10px;font-size:0.67rem;font-weight:700;white-space:nowrap}
+.pill-valid{background:var(--mint-soft);color:var(--mint-text)}
+.pill-invalid{background:var(--peach-soft);color:var(--peach-text)}
+.pill-mudah{background:var(--blue-soft);color:var(--blue-text)}
+.pill-sedang{background:var(--yellow-soft);color:var(--yellow-text)}
+.pill-sukar{background:var(--peach-soft);color:var(--peach-text)}
+.pill-baik{background:var(--mint-soft);color:var(--mint-text)}
+.pill-cukup{background:var(--lavender-soft);color:var(--lavender-text)}
+.pill-jelek{background:var(--yellow-soft);color:var(--yellow-text)}
+.pill-sjelek{background:var(--pink-soft);color:var(--pink-text)}
+.pill-dipakai{background:var(--mint-soft);color:var(--mint-text)}
+.pill-revisi{background:var(--peach-soft);color:var(--peach-text)}
+
+/* ── SCORE BARS ── */
+.score-list{display:flex;flex-direction:column;gap:7px}
+.score-row{display:grid;grid-template-columns:72px 1fr 44px;align-items:center;gap:10px}
+.score-name{font-size:0.78rem;color:var(--text2);font-weight:500}
+.bar-track{height:8px;background:#f5f5f4;border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px}
+.score-val{font-size:0.78rem;font-weight:700;color:var(--text);text-align:right}
+
+/* ── KR20 ── */
+.kr20-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);font-size:0.86rem}
+.kr20-row:last-child{border-bottom:none}
+.kr20-key{color:var(--text2)}.kr20-val{font-weight:700;color:var(--text)}
+.formula-box{margin-top:1rem;background:#1c1917;color:#6ee7b7;border-radius:10px;padding:12px 16px;font-family:'Courier New',monospace;font-size:0.82rem}
+
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--text3)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ── TOOLTIP ── */
+[data-tip]{position:relative;cursor:help}
+[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1c1917;color:#f5f5f4;font-size:0.71rem;font-weight:400;padding:5px 10px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s;z-index:99;font-family:'DM Sans',sans-serif;line-height:1.4;text-transform:none;letter-spacing:0}
+[data-tip]:hover::after{opacity:1}
+
+footer{text-align:center;padding:1.5rem 1rem 2rem;font-size:0.75rem;color:var(--text3);border-top:1px solid var(--border);margin-top:2rem}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-shapes">
+    <div class="header-dots"></div>
+    <div class="shape s1"></div><div class="shape s2"></div>
+    <div class="shape s3"></div><div class="shape s4"></div><div class="shape s5"></div>
+  </div>
+  <div class="header-content">
+    <div class="header-left">
+      <div class="header-eyebrow"><span></span>Evaluasi Pembelajaran</div>
+      <h1>Dashboard <em>Analisis</em><br>Butir Soal</h1>
+      <p>Analisis komprehensif kualitas instrumen tes berdasarkan validitas, reliabilitas, daya pembeda, dan tingkat kesukaran.</p>
+      <div class="identity-bar">
+        <div class="id-avatar">AD</div>
+        <div>
+          <div class="id-name">Anggia Dhini Hanifa</div>
+          <div class="id-nim">NIM 2401489</div>
+        </div>
+      </div>
+      <div class="header-badges" style="margin-top:0.9rem">
+        <div class="hbadge"><strong>N</strong> = 20 peserta</div>
+        <div class="hbadge"><strong>k</strong> = 25 butir soal</div>
+        <div class="hbadge"><strong>r tabel</strong> = 0.444</div>
+        <div class="hbadge"><strong>Metode</strong> KR-20</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="hstat hs-pink">
+        <div class="hstat-val">8.45</div>
+        <div class="hstat-lbl">Skor rata-rata</div>
+      </div>
+      <div class="hstat hs-blue">
+        <div class="hstat-val">4<span style="font-size:0.9rem;color:#a8a29e">/25</span></div>
+        <div class="hstat-lbl">Butir valid</div>
+      </div>
+      <div class="hstat hs-mint">
+        <div class="hstat-val">0.506</div>
+        <div class="hstat-lbl">Reliabilitas KR-20</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar no-print">
+  <div class="toolbar-inner">
+    <div class="toolbar-left">Dibuat oleh <strong>Anggia Dhini Hanifa</strong> · NIM 2401489</div>
+    <button class="btn-print" onclick="window.print()">
+      <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Export / Print PDF
+    </button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="info-strip">
+    Kelompok atas/bawah dibagi 50%–50% berdasarkan peringkat skor total (Arikunto). Butir valid bila r hitung ≥ r tabel (0.444).
+  </div>
+
+  <!-- S01 RINGKASAN -->
+  <div class="section-label">
+    <div class="section-num sn-pink">01</div>
+    <div><h2>Ringkasan</h2><p>Gambaran umum hasil analisis</p></div>
+  </div>
+  <div class="cards-grid" style="margin-bottom:1rem">
+    <div class="stat-card card sc-pink">
+      <div class="stat-accent sa-pink">📊</div>
+      <div class="stat-label">Skor rata-rata</div>
+      <div class="stat-value">8.45<sub>/25</sub></div>
+      <span class="stat-badge badge-pink">Dari 20 siswa</span>
+      <div class="interp-box interp-pink">Rata-rata skor <strong>8.45/25 (33.8%)</strong> — tergolong rendah, mengindikasikan soal terlalu sukar atau kemampuan peserta yang perlu ditingkatkan.</div>
+    </div>
+    <div class="stat-card card sc-mint">
+      <div class="stat-accent sa-mint">✅</div>
+      <div class="stat-label">Butir valid</div>
+      <div class="stat-value">4<sub>/25</sub></div>
+      <span class="stat-badge badge-mint">r ≥ 0.444</span>
+      <div class="interp-box interp-mint">Hanya <strong>4 dari 25 butir (16%)</strong> yang valid. Instrumen memerlukan revisi menyeluruh sebelum digunakan kembali.</div>
+    </div>
+    <div class="stat-card card sc-lav">
+      <div class="stat-accent sa-lav">🔒</div>
+      <div class="stat-label">Reliabilitas (KR-20)</div>
+      <div class="stat-value">0.506</div>
+      <span class="stat-badge badge-lav">Cukup</span>
+      <div class="interp-box interp-lav">Nilai KR-20 <strong>0.506</strong> masuk kategori <strong>Cukup</strong> (0.4–0.7). Konsistensi instrumen masih dapat diterima namun perlu ditingkatkan.</div>
+    </div>
+    <div class="stat-card card sc-yellow">
+      <div class="stat-accent sa-yellow">📈</div>
+      <div class="stat-label">Tingkat kesukaran</div>
+      <div class="stat-value" style="font-size:1.3rem;line-height:1.4">15 Sukar<br><span style="font-size:0.88rem;font-weight:500;color:var(--text2)">5 Sedang · 5 Mudah</span></div>
+      <div class="interp-box interp-yellow"><strong>60% soal sukar</strong> — distribusi tidak ideal. Proporsi yang baik adalah Mudah:Sedang:Sukar = 3:4:3 (Arikunto).</div>
+    </div>
+    <div class="stat-card card sc-blue">
+      <div class="stat-accent sa-blue">📌</div>
+      <div class="stat-label">Butir dipakai</div>
+      <div class="stat-value">4<sub>/25</sub></div>
+      <span class="stat-badge badge-blue">Soal 1, 9, 10, 18</span>
+      <div class="interp-box interp-blue">Butir <strong>1, 9, 10, dan 18</strong> memenuhi kriteria valid dan layak dipakai. Selebihnya perlu direvisi atau diganti.</div>
+    </div>
+    <div class="stat-card card sc-peach">
+      <div class="stat-accent sa-peach">⚠️</div>
+      <div class="stat-label">Revisi / dibuang</div>
+      <div class="stat-value">21<sub>/25</sub></div>
+      <span class="stat-badge badge-peach">Perlu perbaikan</span>
+      <div class="interp-box interp-pink"><strong>21 butir (84%)</strong> perlu direvisi atau dibuang — terutama butir dengan daya pembeda negatif atau sangat jelek.</div>
+    </div>
+  </div>
+
+  <!-- S02 DISTRIBUSI -->
+  <div class="section-label" style="margin-top:2.5rem">
+    <div class="section-num sn-blue">02</div>
+    <div><h2>Distribusi Butir Soal</h2><p>Validitas, tingkat kesukaran, dan daya pembeda</p></div>
+  </div>
+  <div class="two-col" style="margin-bottom:1.2rem">
+    <div class="card">
+      <div class="card-title">Validitas Butir (r hitung vs r tabel)</div>
+      <div style="position:relative;height:220px"><canvas id="chartValiditas"></canvas></div>
+      <div class="interp-box interp-mint" style="margin-top:1rem">Batang <strong>hijau</strong> = valid (r ≥ 0.444), <strong>merah muda</strong> = tidak valid. Garis kuning putus-putus = r tabel.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Distribusi Tingkat Kesukaran</div>
+      <div style="position:relative;height:200px"><canvas id="chartKesukaran"></canvas></div>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#93c5fd"></span>Mudah (5)</span>
+        <span><span class="legend-dot" style="background:#fde68a"></span>Sedang (4)</span>
+        <span><span class="legend-dot" style="background:#fca5a5"></span>Sukar (16)</span>
+      </div>
+      <div class="interp-box interp-yellow" style="margin-top:0.8rem">Dominasi soal sukar <strong>(64%)</strong> menunjukkan instrumen belum proporsional secara tingkat kesukaran.</div>
+    </div>
+  </div>
+  <div class="two-col" style="margin-bottom:2rem">
+    <div class="card">
+      <div class="card-title">Distribusi Daya Pembeda</div>
+      <div style="position:relative;height:200px"><canvas id="chartDP"></canvas></div>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#6ee7b7"></span>Baik (4)</span>
+        <span><span class="legend-dot" style="background:#c4b5fd"></span>Cukup (5)</span>
+        <span><span class="legend-dot" style="background:#fde68a"></span>Jelek (6)</span>
+        <span><span class="legend-dot" style="background:#f9a8d4"></span>Sangat Jelek (10)</span>
+      </div>
+      <div class="interp-box interp-pink" style="margin-top:0.8rem"><strong>10 butir sangat jelek</strong> — tidak mampu membedakan kemampuan siswa. Perlu dieliminasi dari bank soal.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Rekap Keputusan Butir</div>
+      <div style="position:relative;height:200px"><canvas id="chartKeputusan"></canvas></div>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#6ee7b7"></span>Dipakai (4)</span>
+        <span><span class="legend-dot" style="background:#fca5a5"></span>Revisi/Dibuang (21)</span>
+      </div>
+      <div class="interp-box interp-mint" style="margin-top:0.8rem">Dari 25 butir, hanya <strong>16%</strong> yang layak dipakai. Rekonstruksi instrumen sangat disarankan.</div>
+    </div>
+  </div>
+
+  <!-- S03 PER BUTIR -->
+  <div class="section-label">
+    <div class="section-num sn-mint">03</div>
+    <div><h2>Hasil per Butir</h2><p>P = tingkat kesukaran · D = daya pembeda · r = point biserial</p></div>
+  </div>
+  <div class="card" style="margin-bottom:2rem">
+    <div class="filter-bar no-print">
+      <button class="filter-btn active" data-filter="all" onclick="filterTable(this,'all')">Semua</button>
+      <button class="filter-btn fb-mint" data-filter="dipakai" onclick="filterTable(this,'dipakai')">✅ Dipakai saja</button>
+      <button class="filter-btn fb-blue" data-filter="valid" onclick="filterTable(this,'valid')">Valid saja</button>
+      <button class="filter-btn" data-filter="revisi" onclick="filterTable(this,'revisi')">⚠️ Revisi/Dibuang</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>No</th><th>Kunci</th>
+          <th data-tip="Indeks tingkat kesukaran (0–1). Makin kecil = makin sukar.">P (TK) ℹ</th>
+          <th>Kategori TK</th>
+          <th data-tip="Daya pembeda: kemampuan butir membedakan siswa pandai dan kurang pandai.">D (DP) ℹ</th>
+          <th>Kategori DP</th>
+          <th data-tip="Korelasi point biserial. Valid jika r ≥ r tabel (0.444).">r Hitung ℹ</th>
+          <th>Validitas</th><th>Keputusan</th>
+        </tr></thead>
+        <tbody id="tableButir"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- S04 + S05 -->
+  <div class="two-col" style="margin-bottom:2rem">
+    <div>
+      <div class="section-label" style="margin-top:0">
+        <div class="section-num sn-lav">04</div>
+        <div><h2>Skor Peserta</h2><p>Urut dari skor tertinggi</p></div>
+      </div>
+      <div class="card"><div class="score-list" id="scoreList"></div></div>
+    </div>
+    <div>
+      <div class="section-label" style="margin-top:0">
+        <div class="section-num sn-peach">05</div>
+        <div><h2>Reliabilitas KR-20</h2></div>
+      </div>
+      <div class="card">
+        <div class="kr20-row"><span class="kr20-key">Jumlah butir (k)</span><span class="kr20-val">25</span></div>
+        <div class="kr20-row"><span class="kr20-key">Σ p·q</span><span class="kr20-val">3.3750</span></div>
+        <div class="kr20-row"><span class="kr20-key">Varians skor total (S²)</span><span class="kr20-val">8.4475</span></div>
+        <div class="kr20-row"><span class="kr20-key">r₁₁ (KR-20)</span><span class="kr20-val" style="color:#be185d;font-size:1.2rem">0.5059</span></div>
+        <div class="kr20-row"><span class="kr20-key">Kategori</span><span class="kr20-val"><span class="pill pill-cukup">Cukup</span></span></div>
+        <div class="formula-box">r₁₁ = [k/(k-1)] × [1 − (Σpq / S²)]</div>
+        <div style="margin-top:1rem;font-size:0.77rem;color:var(--text3);line-height:1.7">
+          KR-20 ≥ 0.7 = Tinggi &nbsp;·&nbsp; 0.4–0.7 = Cukup &nbsp;·&nbsp; &lt; 0.4 = Rendah
+        </div>
+        <div class="interp-box interp-lav" style="margin-top:1rem">Nilai <strong>r₁₁ = 0.5059</strong> menunjukkan reliabilitas <strong>Cukup</strong>. Instrumen konsisten secara internal, namun belum mencapai standar ideal (≥ 0.7) untuk digunakan secara luas.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Dashboard Analisis Butir Soal &nbsp;·&nbsp; Anggia Dhini Hanifa &nbsp;·&nbsp; NIM 2401489 &nbsp;·&nbsp; N = 20 peserta &nbsp;·&nbsp; k = 25 butir &nbsp;·&nbsp; r tabel = 0.444</footer>
+
+<script>
+const kunci=['C','D','C','B','B','C','D','B','C','A','D','B','A','C','A','B','A','C','A','B','C','C','C','D','D'];
+const validitas=[{r:0.623},{r:0.244},{r:0.367},{r:-0.035},{r:-0.180},{r:0.116},{r:0.334},{r:0.141},{r:0.583},{r:0.489},{r:0.230},{r:0.291},{r:0.308},{r:-0.029},{r:0.421},{r:0.421},{r:0.346},{r:0.712},{r:0.367},{r:0.270},{r:0.011},{r:0.270},{r:0.227},{r:0.124},{r:0.180}];
+const tk=[0.25,0.60,0.15,0.05,0.10,0.20,0.10,0.10,0.05,0.25,0.05,0.35,0.20,0.20,0.15,0.15,0.40,0.45,0.15,0.10,0.85,0.80,0.85,0.95,0.90];
+const tkKat=['Sukar','Sedang','Sukar','Sukar','Sukar','Sukar','Sukar','Sukar','Sukar','Sukar','Sukar','Sedang','Sukar','Sukar','Sukar','Sukar','Sedang','Sedang','Sukar','Sukar','Mudah','Mudah','Mudah','Mudah','Mudah'];
+const dp=[-0.2,0.4,0,-0.2,-0.2,0.2,0.2,0,0,0.4,0.2,0,-0.2,0.2,0,-0.2,0.6,0.4,-0.2,-0.2,0.2,-0.2,-0.2,0,0];
+const dpKat=['Sangat Jelek','Baik','Jelek','Sangat Jelek','Sangat Jelek','Cukup','Cukup','Jelek','Jelek','Baik','Cukup','Jelek','Sangat Jelek','Cukup','Jelek','Sangat Jelek','Baik','Baik','Sangat Jelek','Sangat Jelek','Cukup','Sangat Jelek','Sangat Jelek','Jelek','Jelek'];
+const keputusan=['Dipakai','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Dipakai','Dipakai','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Dipakai','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang','Revisi/Dibuang'];
+const scores=[{name:'Siswa 1',val:5},{name:'Siswa 2',val:11},{name:'Siswa 3',val:8},{name:'Siswa 4',val:9},{name:'Siswa 5',val:11},{name:'Siswa 6',val:7},{name:'Siswa 7',val:10},{name:'Siswa 8',val:6},{name:'Siswa 9',val:11},{name:'Siswa 10',val:4},{name:'Siswa 11',val:7},{name:'Siswa 12',val:15},{name:'Siswa 13',val:8},{name:'Siswa 14',val:10},{name:'Siswa 15',val:7},{name:'Siswa 16',val:10},{name:'Siswa 17',val:6},{name:'Siswa 18',val:5},{name:'Siswa 19',val:10},{name:'Siswa 20',val:8}];
+
+function tkClass(k){return k==='Mudah'?'pill-mudah':k==='Sedang'?'pill-sedang':'pill-sukar'}
+function dpClass(d){return d==='Baik'?'pill-baik':d==='Cukup'?'pill-cukup':d==='Jelek'?'pill-jelek':'pill-sjelek'}
+
+const tbody=document.getElementById('tableButir');
+for(let i=0;i<25;i++){
+  const v=validitas[i].r>=0.444,d=keputusan[i]==='Dipakai';
+  const tr=document.createElement('tr');
+  tr.dataset.filter=d?'dipakai':v?'valid':'revisi';
+  if(d)tr.classList.add('row-dipakai');
+  tr.innerHTML=`<td>${i+1}${d?'<span class="dipakai-badge">★</span>':''}</td><td>${kunci[i]}</td><td>${tk[i].toFixed(3)}</td><td><span class="pill ${tkClass(tkKat[i])}">${tkKat[i]}</span></td><td>${dp[i].toFixed(2)}</td><td><span class="pill ${dpClass(dpKat[i])}">${dpKat[i]}</span></td><td style="font-weight:700;color:${v?'#065f46':'#be123c'}">${validitas[i].r.toFixed(3)}</td><td><span class="pill ${v?'pill-valid':'pill-invalid'}">${v?'Valid':'Tidak Valid'}</span></td><td><span class="pill ${d?'pill-dipakai':'pill-revisi'}">${keputusan[i]}</span></td>`;
+  tbody.appendChild(tr);
+}
+
+function filterTable(btn,type){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#tableButir tr').forEach(tr=>{
+    tr.style.display=(type==='all'||tr.dataset.filter===type||
+      (type==='valid'&&(tr.dataset.filter==='valid'||tr.dataset.filter==='dipakai')))?'':'none';
+  });
+}
+
+const sorted=[...scores].sort((a,b)=>b.val-a.val);
+const barPalette=['#f9a8d4','#93c5fd','#6ee7b7','#c4b5fd','#fde68a','#fca5a5','#7dd3fc'];
+sorted.forEach((s,i)=>{
+  const pct=(s.val/25*100).toFixed(1);
+  document.getElementById('scoreList').innerHTML+=`<div class="score-row"><span class="score-name">${s.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${barPalette[i%barPalette.length]}"></div></div><span class="score-val">${s.val}/25</span></div>`;
+});
+
+Chart.defaults.color='#a8a29e';
+Chart.defaults.font.family="'DM Sans',sans-serif";
+Chart.defaults.font.size=10;
+const grid='#f5f5f4';
+
+const rData=validitas.map(v=>parseFloat(v.r.toFixed(3)));
+new Chart(document.getElementById('chartValiditas'),{type:'bar',data:{labels:Array.from({length:25},(_,i)=>`S${i+1}`),datasets:[{label:'r hitung',data:rData,backgroundColor:rData.map(r=>r>=0.444?'#6ee7b7':'#fca5a5'),borderRadius:3,borderSkipped:false},{label:'r tabel',data:Array(25).fill(0.444),type:'line',borderColor:'#f9a8d4',borderWidth:2,pointRadius:0,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:8}},grid:{display:false}},y:{grid:{color:grid},min:-0.3,max:0.85}}}});
+new Chart(document.getElementById('chartKesukaran'),{type:'doughnut',data:{labels:['Mudah (5)','Sedang (4)','Sukar (16)'],datasets:[{data:[5,4,16],backgroundColor:['#93c5fd','#fde68a','#fca5a5'],borderWidth:2,borderColor:'#fff',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('chartDP'),{type:'bar',data:{labels:['Sangat Jelek','Jelek','Cukup','Baik'],datasets:[{label:'Jumlah soal',data:[10,6,5,4],backgroundColor:['#f9a8d4','#fde68a','#c4b5fd','#6ee7b7'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:grid},min:0,max:12}}}});
+new Chart(document.getElementById('chartKeputusan'),{type:'doughnut',data:{labels:['Dipakai (4)','Revisi/Dibuang (21)'],datasets:[{data:[4,21],backgroundColor:['#6ee7b7','#fca5a5'],borderWidth:2,borderColor:'#fff',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} soal`}}}}});
+</script>
+</body>
+</html>
