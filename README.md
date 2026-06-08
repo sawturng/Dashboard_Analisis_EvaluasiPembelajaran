@@ -1,4 +1,4 @@
-# 📊 Dashboard Analisis Butir Soal Evaluasi Pembelajaran
+# Dashboard Analisis Butir Soal Evaluasi Pembelajaran
 
 ## Deskripsi
 
@@ -6,9 +6,7 @@ Dashboard Analisis Butir Soal merupakan aplikasi berbasis web yang dikembangkan 
 
 Proyek ini dibuat sebagai tugas UAS Mata Kuliah Evaluasi Pembelajaran.
 
----
-
-## 🎯 Tujuan
+## Tujuan
 
 Tujuan pengembangan aplikasi ini adalah:
 
@@ -18,9 +16,7 @@ Tujuan pengembangan aplikasi ini adalah:
 - Menyediakan visualisasi data yang mudah dipahami.
 - Mempermudah interpretasi hasil evaluasi pembelajaran.
 
----
-
-## ✨ Fitur Utama
+## Fitur Utama
 
 ### Dashboard Utama
 
@@ -53,40 +49,6 @@ Tujuan pengembangan aplikasi ini adalah:
 - Grafik Daya Pembeda
 - Ringkasan Analisis Instrumen
 
----
-
-## 🛠 Teknologi yang Digunakan
-
-- HTML5
-- Tailwind CSS
-- JavaScript
-- Chart.js
-- GitHub Pages
-
----
-
-## 📂 Struktur Project
-
-```text
-Dashboard_Analisis_EvaluasiPembelajaran
-│
-├── index.html
-│
-├── css
-│   └── style.css
-│
-├── js
-│   ├── data.js
-│   ├── analisis.js
-│   └── dashboard.js
-│
-├── assets
-│   └── images
-│
-└── README.md
-```
-
----
 
 ## 📖 Metode Analisis
 
@@ -102,8 +64,6 @@ Rumus:
 r_{xy} = \frac{N\Sigma XY - (\Sigma X)(\Sigma Y)}
 {\sqrt{[N\Sigma X^2-(\Sigma X)^2][N\Sigma Y^2-(\Sigma Y)^2]}}
 ```
-
----
 
 ### 2. Daya Pembeda
 
@@ -121,7 +81,6 @@ Keterangan:
 - BB = Banyaknya siswa kelompok bawah yang menjawab benar
 - JA = Jumlah siswa kelompok atas
 
----
 
 ### 3. Tingkat Kesukaran
 
@@ -147,7 +106,6 @@ Kategori:
 | 0.31 - 0.70 | Sedang |
 | 0.71 - 1.00 | Mudah |
 
----
 
 ### 4. Reliabilitas KR-20
 
@@ -169,8 +127,6 @@ Keterangan:
 - q = Proporsi jawaban salah
 - St² = Varians total
 
----
-
 ## 📊 Dataset
 
 Dataset yang digunakan terdiri dari:
@@ -181,8 +137,6 @@ Dataset yang digunakan terdiri dari:
 - Skoring Benar Salah (0 dan 1)
 
 Data digunakan sebagai simulasi analisis butir soal pada mata kuliah Evaluasi Pembelajaran.
-
----
 
 ## 📈 Hasil Analisis
 
@@ -197,8 +151,6 @@ Berdasarkan hasil pengolahan data diperoleh:
 
 Secara umum sebagian besar soal memerlukan revisi karena belum memenuhi kriteria validitas dan daya pembeda yang baik.
 
----
-
 ## 🚀 Cara Menjalankan
 
 1. Download project ini.
@@ -211,34 +163,12 @@ index.html
 
 4. Atau gunakan ekstensi Live Server.
 
----
-
-## 📷 Tampilan Dashboard
-
-Tambahkan screenshot dashboard pada folder berikut:
-
-```text
-assets/images/dashboard.png
-```
-
-Kemudian tampilkan:
-
-```markdown
-![Dashboard](assets/images/dashboard.png)
-```
-
----
-
 ## 👨‍💻 Pengembang
 
-**Nama:** Angga Cahya Anuraga  
+**Nama:** Anggia Dhini Hanifa  
 **Program Studi:** Pendidikan Ilmu Komputer  
 **Universitas:** Universitas Pendidikan Indonesia  
 **Mata Kuliah:** Evaluasi Pembelajaran  
 **Tahun:** 2026
-
----
-
-## 📄 Lisensi
 
 Proyek ini dibuat untuk keperluan akademik dan pembelajaran.
